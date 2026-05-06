@@ -100,6 +100,41 @@ models:
     model: kimi-k2-0905-preview
     concurrency: 3
 
+  # OpenRouter — additional models the user requested.
+  # use_provider_cost: true picks up usage.cost from each response.
+
+  - id: mimo-pro-or
+    enabled: true
+    base_url: https://openrouter.ai/api/v1
+    api_key_env: OPENROUTER_API_KEY
+    model: xiaomi/mimo-v2.5-pro
+    use_provider_cost: true
+    concurrency: 3
+
+  - id: qwen3-plus-or
+    enabled: true
+    base_url: https://openrouter.ai/api/v1
+    api_key_env: OPENROUTER_API_KEY
+    model: qwen/qwen3.6-plus
+    use_provider_cost: true
+    concurrency: 3
+
+  - id: deepseek-v4-flash-or
+    enabled: true
+    base_url: https://openrouter.ai/api/v1
+    api_key_env: OPENROUTER_API_KEY
+    model: deepseek/deepseek-v4-flash
+    use_provider_cost: true
+    concurrency: 3
+
+  - id: tencent-hy3-or
+    enabled: true
+    base_url: https://openrouter.ai/api/v1
+    api_key_env: OPENROUTER_API_KEY
+    model: tencent/hy3-preview:free
+    use_provider_cost: true
+    concurrency: 3
+
   # Ollama Cloud — using OpenAI-compatible /v1 endpoint.
   # Available cloud models (suffix -cloud): gpt-oss:20b-cloud, gpt-oss:120b-cloud,
   # qwen3-coder:480b-cloud, deepseek-v3.1:671b-cloud. Verify on docs.ollama.com/cloud.
