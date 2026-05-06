@@ -3,8 +3,10 @@ defaults:
   temperature: 0.0
   repeats: 1
 
+# Switched to zai-glm so judge uses a key the user actually has set.
+# Change back to gpt-4-1-mini (or any enabled model) when OPENAI_API_KEY is available.
 judge:
-  model_id: gpt-4-1-mini
+  model_id: zai-glm
 
 reporting:
   filter:
@@ -13,8 +15,10 @@ reporting:
     forbidden_fail_max: 2
 
 models:
+  # ---------- existing entries (kept, disabled) ----------
+
   - id: gpt-4-1-mini
-    enabled: true
+    enabled: false
     base_url: https://api.openai.com/v1
     api_key_env: OPENAI_API_KEY
     model: gpt-4.1-mini
@@ -33,7 +37,7 @@ models:
       output_per_million: 8.00
 
   - id: deepseek-chat
-    enabled: true
+    enabled: false
     base_url: https://api.deepseek.com/v1
     api_key_env: DEEPSEEK_API_KEY
     model: deepseek-chat
@@ -54,7 +58,7 @@ models:
     concurrency: 2
 
   - id: claude-haiku-or
-    enabled: true
+    enabled: false
     base_url: https://openrouter.ai/api/v1
     api_key_env: OPENROUTER_API_KEY
     model: anthropic/claude-3.5-haiku
@@ -68,4 +72,40 @@ models:
     model: qwen/qwen3-72b-thinking
     is_reasoning: true
     use_provider_cost: true
+    concurrency: 2
+
+  # ---------- new providers ----------
+  # NOTE: pricing left unset on new entries -> cost_source=unknown in reports.
+  # Fill in input_per_million / output_per_million when you have current rates.
+  # Verify exact `model` strings against each provider's docs — they change often.
+
+  - id: minimax-m1
+    enabled: true
+    base_url: https://api.minimax.chat/v1
+    api_key_env: MINIMAX_API_KEY
+    model: MiniMax-M1
+    concurrency: 3
+
+  - id: zai-glm
+    enabled: true
+    base_url: https://api.z.ai/api/paas/v4
+    api_key_env: ZAI_API_KEY
+    model: glm-4.6
+    concurrency: 3
+
+  - id: kimi-k2
+    enabled: true
+    base_url: https://api.moonshot.cn/v1
+    api_key_env: KIMI_API_KEY
+    model: kimi-k2-0905-preview
+    concurrency: 3
+
+  - id: ollama-local
+    enabled: true
+    base_url: http://localhost:11434/v1
+    api_key_env: OLAMA_API_KEY
+    model: llama3.1:8b
+    pricing:
+      input_per_million: 0.0
+      output_per_million: 0.0
     concurrency: 2
