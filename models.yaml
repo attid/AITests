@@ -1,0 +1,71 @@
+defaults:
+  concurrency: 3
+  temperature: 0.0
+  repeats: 1
+
+judge:
+  model_id: gpt-4-1-mini
+
+reporting:
+  filter:
+    avg_score_min: 0.75
+    json_ok_rate_min: 0.90
+    forbidden_fail_max: 2
+
+models:
+  - id: gpt-4-1-mini
+    enabled: true
+    base_url: https://api.openai.com/v1
+    api_key_env: OPENAI_API_KEY
+    model: gpt-4.1-mini
+    pricing:
+      input_per_million: 0.40
+      output_per_million: 1.60
+    concurrency: 5
+
+  - id: gpt-4-1
+    enabled: false
+    base_url: https://api.openai.com/v1
+    api_key_env: OPENAI_API_KEY
+    model: gpt-4.1
+    pricing:
+      input_per_million: 2.00
+      output_per_million: 8.00
+
+  - id: deepseek-chat
+    enabled: true
+    base_url: https://api.deepseek.com/v1
+    api_key_env: DEEPSEEK_API_KEY
+    model: deepseek-chat
+    pricing:
+      input_per_million: 0.27
+      output_per_million: 1.10
+    concurrency: 3
+
+  - id: deepseek-reasoner
+    enabled: false
+    base_url: https://api.deepseek.com/v1
+    api_key_env: DEEPSEEK_API_KEY
+    model: deepseek-reasoner
+    pricing:
+      input_per_million: 0.55
+      output_per_million: 2.19
+    is_reasoning: true
+    concurrency: 2
+
+  - id: claude-haiku-or
+    enabled: true
+    base_url: https://openrouter.ai/api/v1
+    api_key_env: OPENROUTER_API_KEY
+    model: anthropic/claude-3.5-haiku
+    use_provider_cost: true
+    concurrency: 3
+
+  - id: qwen3-thinking-or
+    enabled: false
+    base_url: https://openrouter.ai/api/v1
+    api_key_env: OPENROUTER_API_KEY
+    model: qwen/qwen3-72b-thinking
+    is_reasoning: true
+    use_provider_cost: true
+    concurrency: 2

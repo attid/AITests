@@ -1,0 +1,22 @@
+defaults:
+  concurrency: 3
+  temperature: 0.0
+  repeats: 1
+
+models:
+  - id: gpt-mini
+    enabled: true
+    base_url: https://api.openai.com/v1
+    api_key_env: OPENAI_API_KEY
+    model: gpt-4.1-mini
+    pricing:
+      input_per_million: 0.40
+      output_per_million: 1.60
+
+  - id: cheap-via-or
+    enabled: false
+    base_url: https://openrouter.ai/api/v1
+    api_key_env: OPENROUTER_API_KEY
+    model: deepseek/deepseek-chat
+    use_provider_cost: true
+    concurrency: 2
