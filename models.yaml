@@ -81,21 +81,22 @@ models:
 
   - id: minimax-m1
     enabled: true
-    base_url: https://api.minimax.chat/v1
+    base_url: https://api.minimax.io/v1
     api_key_env: MINIMAX_API_KEY
     model: MiniMax-M1
     concurrency: 3
 
+  # GLM Coding Plan -> use the coding endpoint, not the general one.
   - id: zai-glm
     enabled: true
-    base_url: https://api.z.ai/api/paas/v4
+    base_url: https://api.z.ai/api/coding/paas/v4
     api_key_env: ZAI_API_KEY
     model: glm-4.6
     concurrency: 3
 
   - id: kimi-k2
     enabled: true
-    base_url: https://api.moonshot.cn/v1
+    base_url: https://api.kimi.com/coding/v1
     api_key_env: KIMI_API_KEY
     model: kimi-k2-0905-preview
     concurrency: 3
