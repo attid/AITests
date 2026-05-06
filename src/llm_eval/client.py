@@ -89,6 +89,7 @@ class LLMClient:
         headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
+            **self.model.extra_headers,
         }
 
         last_error: Exception | None = None

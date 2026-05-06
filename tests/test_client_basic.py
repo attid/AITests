@@ -94,6 +94,22 @@ async def test_response_format_passed_when_set(monkeypatch, httpx_mock) -> None:
     assert b'"json_object"' in body
 
 
+async def test_extra_headers_passed(monkeypatch, httpx_mock) -> None:
+    monkeypatch.setenv("FAKE_KEY", "sk-test")
+    httpx_mock.add_response(
+        url="https://api.example.com/v1/chat/completions",
+        json={
+            "choices": [{"message": {"content": "ok"}}],
+            "usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2},
+        },
+    )
+    client = LLMClient(_model(extra_headers={"User-Agent": "claude-code/1.0", "X-Title": "eval"}))
+    await client.call(prompt="p", system_prompt="s", max_tokens=10)
+    request = httpx_mock.get_requests()[0]
+    assert request.headers.get("User-Agent") == "claude-code/1.0"
+    assert request.headers.get("X-Title") == "eval"
+
+
 async def test_missing_api_key_raises(monkeypatch) -> None:
     monkeypatch.delenv("FAKE_KEY", raising=False)
     client = LLMClient(_model())

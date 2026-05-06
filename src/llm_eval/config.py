@@ -142,6 +142,7 @@ class ModelConfig(BaseModel):
     response_format: Literal["json_object"] | None = None
     concurrency: int | None = None
     temperature: float | None = None
+    extra_headers: dict[str, str] = Field(default_factory=dict)
 
 
 class RunConfig(BaseModel):

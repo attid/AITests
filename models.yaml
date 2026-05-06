@@ -83,7 +83,7 @@ models:
     enabled: true
     base_url: https://api.minimax.io/v1
     api_key_env: MINIMAX_API_KEY
-    model: MiniMax-M1
+    model: MiniMax-M2.7
     concurrency: 3
 
   # GLM Coding Plan -> use the coding endpoint, not the general one.
@@ -94,12 +94,15 @@ models:
     model: glm-4.6
     concurrency: 3
 
+  # /coding/v1 is gated by User-Agent: must look like a known coding agent.
   - id: kimi-k2
     enabled: true
     base_url: https://api.kimi.com/coding/v1
     api_key_env: KIMI_API_KEY
     model: kimi-k2-0905-preview
     concurrency: 3
+    extra_headers:
+      User-Agent: claude-code/1.0
 
   # OpenRouter — additional models the user requested.
   # use_provider_cost: true picks up usage.cost from each response.
