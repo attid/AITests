@@ -70,6 +70,16 @@ class LlmJudgeTask(_TaskBase):
     judge_model: str | None = None  # overrides global judge
 
 
+class TextQualityTask(_TaskBase):
+    type: Literal["text_quality"]
+    min_words: int = 3
+    script: Literal["any", "cyrillic", "latin"] = "any"
+    min_script_ratio: float = 0.7
+    disallow_cjk: bool = True
+    disallow_json: bool = True
+    disallow_markdown: bool = True
+
+
 Task = Annotated[
     ExactTask
     | ContainsTask
@@ -77,7 +87,8 @@ Task = Annotated[
     | NumericTask
     | JsonExactTask
     | JsonSchemaTask
-    | LlmJudgeTask,
+    | LlmJudgeTask
+    | TextQualityTask,
     Field(discriminator="type"),
 ]
 

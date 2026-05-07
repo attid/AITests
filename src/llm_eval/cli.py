@@ -13,7 +13,8 @@ import yaml
 from pydantic import ValidationError
 from rich.console import Console
 
-from llm_eval.client import CallError, LLMClient
+from llm_eval.client import CallError, CallResult, LLMClient
+from llm_eval.compare import compare_model_summaries, summarize_by_model
 from llm_eval.config import LlmJudgeTask, ModelConfig, RunConfig, Task, load_run_config, parse_task
 from llm_eval.pricing import compute_cost
 from llm_eval.reporting import (
@@ -22,6 +23,7 @@ from llm_eval.reporting import (
     write_results_csv,
 )
 from llm_eval.runner import Runner
+from llm_eval.scoring.preprocess import strip_thinking
 from llm_eval.storage import ResultStore
 
 app = typer.Typer(no_args_is_help=True, add_completion=False)
@@ -193,6 +195,70 @@ def report(
     console.print(f"[green]Wrote:[/green] results.csv, leaderboard.csv, report.md in {run_dir}")
 
 
+def _fmt(value: float | None, digits: int) -> str:
+    if value is None:
+        return "—"
+    return f"{value:.{digits}f}"
+
+
+def _fmt_delta(value: float | None, digits: int) -> str:
+    if value is None:
+        return "—"
+    return f"{value:+.{digits}f}"
+
+
+@app.command()
+def compare(
+    old_run_dir: Path = typer.Argument(..., exists=True, file_okay=False),
+    new_run_dir: Path = typer.Argument(..., exists=True, file_okay=False),
+) -> None:
+    """Compare model-level score, cost, and latency between two run dirs."""
+    old_jsonl = old_run_dir / "results.jsonl"
+    new_jsonl = new_run_dir / "results.jsonl"
+    for jsonl in (old_jsonl, new_jsonl):
+        if not jsonl.exists():
+            console.print(f"[red]No results.jsonl in {jsonl.parent}[/red]")
+            raise typer.Exit(code=1)
+
+    old_records = list(ResultStore(old_jsonl).read())
+    new_records = list(ResultStore(new_jsonl).read())
+    if not old_records or not new_records:
+        console.print("[yellow]Both runs must contain at least one record[/yellow]")
+        raise typer.Exit(code=1)
+
+    rows = compare_model_summaries(
+        summarize_by_model(old_records),
+        summarize_by_model(new_records),
+    )
+    console.print(
+        "model,old_score,new_score,score_delta,old_cost,new_cost,cost_delta,"
+        "old_latency,new_latency,latency_delta,old_records,new_records,old_errors,new_errors"
+    )
+    for row in rows:
+        old = row.old
+        new = row.new
+        console.print(
+            ",".join(
+                [
+                    row.model_id,
+                    _fmt(old.weighted_score if old else None, 4),
+                    _fmt(new.weighted_score if new else None, 4),
+                    _fmt_delta(row.score_delta, 4),
+                    _fmt(old.total_cost_usd if old else None, 6),
+                    _fmt(new.total_cost_usd if new else None, 6),
+                    _fmt_delta(row.cost_delta, 6),
+                    _fmt(old.avg_latency_sec if old else None, 3),
+                    _fmt(new.avg_latency_sec if new else None, 3),
+                    _fmt_delta(row.latency_delta, 3),
+                    str(old.records if old else 0),
+                    str(new.records if new else 0),
+                    str(old.errors if old else 0),
+                    str(new.errors if new else 0),
+                ]
+            )
+        )
+
+
 @app.command()
 def ping(
     config: Path = typer.Option(..., "--config", exists=True, dir_okay=False, readable=True),
@@ -215,20 +281,20 @@ def ping(
             console.print(line)
         raise typer.Exit(code=2)
 
-    async def _ping_one(model: ModelConfig) -> tuple[ModelConfig, str | None, object]:
+    async def _ping_one(model: ModelConfig) -> tuple[ModelConfig, str | None, CallResult | None]:
         client = LLMClient(model)
         try:
             result = await client.call(
                 prompt="Reply with the single word: OK",
                 system_prompt="Respond with exactly the word OK and nothing else.",
-                max_tokens=10,
+                max_tokens=128,
                 attempts=1,
             )
         except CallError as e:
             return model, str(e), None
         return model, None, result
 
-    async def _run_all() -> list[tuple[ModelConfig, str | None, object]]:
+    async def _run_all() -> list[tuple[ModelConfig, str | None, CallResult | None]]:
         return await asyncio.gather(*(_ping_one(m) for m in selected))
 
     results = asyncio.run(_run_all())
@@ -239,17 +305,29 @@ def ping(
             console.print(f"[red]✗[/red] {model.id}: {err}")
             any_failed = True
             continue
-        # result is CallResult here
+        if result is None:
+            console.print(f"[red]✗[/red] {model.id}: empty result")
+            any_failed = True
+            continue
+        cleaned = strip_thinking(result.output).strip()
+        if cleaned != "OK":
+            preview = result.output.replace("\n", " ").strip()[:80]
+            reasoning = (result.reasoning_content or "").replace("\n", " ").strip()[:80]
+            console.print(
+                f"[red]✗[/red] {model.id}: unexpected output {preview!r}"
+                + (f" reasoning={reasoning!r}" if reasoning else "")
+            )
+            any_failed = True
+            continue
         cost, source = compute_cost(
             model,
             prompt_tokens=result.usage.prompt_tokens,  # type: ignore[union-attr]
             completion_tokens=result.usage.completion_tokens,  # type: ignore[union-attr]
             provider_cost=result.provider_cost,  # type: ignore[union-attr]
         )
-        preview = result.output.replace("\n", " ").strip()[:40]  # type: ignore[union-attr]
         latency = result.latency_sec  # type: ignore[union-attr]
         console.print(
-            f"[green]✓[/green] {model.id}: {preview!r} ({latency:.2f}s, ${cost:.6f} {source})"
+            f"[green]✓[/green] {model.id}: {cleaned!r} ({latency:.2f}s, ${cost:.6f} {source})"
         )
 
     raise typer.Exit(code=1 if any_failed else 0)

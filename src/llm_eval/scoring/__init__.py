@@ -13,6 +13,7 @@ from llm_eval.config import (
     NumericTask,
     RegexTask,
     Task,
+    TextQualityTask,
 )
 from llm_eval.scoring.contains import score_contains
 from llm_eval.scoring.exact import score_exact
@@ -21,6 +22,7 @@ from llm_eval.scoring.judge import JudgeRunner
 from llm_eval.scoring.numeric import score_numeric
 from llm_eval.scoring.preprocess import contains_forbidden, strip_thinking
 from llm_eval.scoring.regex import score_regex
+from llm_eval.scoring.text_quality import score_text_quality
 
 
 def score(task: Task, raw_output: str) -> tuple[float, dict[str, Any]]:
@@ -49,6 +51,8 @@ def score(task: Task, raw_output: str) -> tuple[float, dict[str, Any]]:
         return score_json_exact(task, output)
     if isinstance(task, JsonSchemaTask):
         return score_json_schema(task, output)
+    if isinstance(task, TextQualityTask):
+        return score_text_quality(task, output)
 
     raise NotImplementedError(f"scoring for {task.type} not yet implemented")
 
