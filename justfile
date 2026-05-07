@@ -6,8 +6,9 @@ default:
 install:
     uv sync
 
-run config="models.yaml" tasks="tasks.jsonl" *args="":
-    uv run llm-eval run --config {{config}} --tasks {{tasks}} {{args}}
+# Pass extra flags after `--`, e.g.:  just run -- --out runs/xxx --resume
+run *args="":
+    uv run llm-eval run --config models.yaml --tasks tasks.jsonl {{args}}
 
 report run_dir:
     uv run llm-eval report {{run_dir}}
