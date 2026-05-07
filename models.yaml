@@ -79,11 +79,16 @@ models:
   # Fill in input_per_million / output_per_million when you have current rates.
   # Verify exact `model` strings against each provider's docs — they change often.
 
+  # MiniMax M2.x emits <think>...</think> inline (not in reasoning_content),
+  # so strip_thinking handles it — but only if not truncated. min_max_tokens
+  # gives enough room for the model to close the </think> + write the answer.
   - id: minimax-m1
     enabled: true
     base_url: https://api.minimax.io/v1
     api_key_env: MINIMAX_API_KEY
     model: MiniMax-M2.7
+    is_reasoning: true
+    min_max_tokens: 1024
     concurrency: 3
 
   # GLM Coding Plan -> use the coding endpoint, not the general one.
@@ -96,7 +101,7 @@ models:
     model: glm-4.6
     is_reasoning: true
     min_max_tokens: 1024
-    concurrency: 3
+    concurrency: 1
 
   - id: zai-glm5
     enabled: true
@@ -105,7 +110,7 @@ models:
     model: glm-5
     is_reasoning: true
     min_max_tokens: 1024
-    concurrency: 3
+    concurrency: 1
 
   - id: zai-glm5.1
     enabled: true
@@ -114,7 +119,7 @@ models:
     model: glm-5.1
     is_reasoning: true
     min_max_tokens: 1024
-    concurrency: 3
+    concurrency: 1
 
   - id: zai-glm5Turbo
     enabled: true
@@ -123,7 +128,7 @@ models:
     model: GLM-5-Turbo
     is_reasoning: true
     min_max_tokens: 1024
-    concurrency: 3
+    concurrency: 1
 
 
   # /coding/v1 is gated by User-Agent: must look like a known coding agent.

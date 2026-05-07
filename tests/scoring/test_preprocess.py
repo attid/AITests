@@ -18,6 +18,15 @@ def test_strip_thinking_multiple_blocks() -> None:
     assert strip_thinking("<think>a</think>X<think>b</think>Y") == "XY"
 
 
+def test_strip_thinking_unclosed_truncated() -> None:
+    # max_tokens cut the response mid-thought, no </think>: drop the tail
+    assert strip_thinking("<think>step 1\nstep 2 (cut off") == ""
+
+
+def test_strip_thinking_closed_then_unclosed() -> None:
+    assert strip_thinking("<think>plan</think>OK<think>more thoughts (cut") == "OK"
+
+
 def test_forbidden_word_boundary_russian() -> None:
     # "да" must NOT match inside "однажды"
     assert not contains_forbidden("однажды было", ["да"], word_boundary=True, case_sensitive=False)

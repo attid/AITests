@@ -5,11 +5,19 @@ from __future__ import annotations
 import re
 
 _THINK_RE = re.compile(r"<think>.*?</think>", re.DOTALL | re.IGNORECASE)
+# Truncated reasoning: <think> opened but never closed (max_tokens cut it).
+# Strip the unclosed block and everything after — there is no usable answer.
+_THINK_UNCLOSED_RE = re.compile(r"<think>(?!.*</think>).*\Z", re.DOTALL | re.IGNORECASE)
 
 
 def strip_thinking(text: str) -> str:
-    """Remove <think>...</think> blocks (some providers inline reasoning)."""
-    return _THINK_RE.sub("", text)
+    """Remove <think>...</think> blocks (some providers inline reasoning).
+
+    Also strips an unclosed <think> tail caused by max_tokens truncation.
+    """
+    text = _THINK_RE.sub("", text)
+    text = _THINK_UNCLOSED_RE.sub("", text)
+    return text
 
 
 def contains_forbidden(
