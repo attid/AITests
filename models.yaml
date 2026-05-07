@@ -92,27 +92,9 @@ models:
     min_max_tokens: 1024
     concurrency: 3
 
-  # GLM Coding Plan -> use the coding endpoint, not the general one.
-  # All GLM models are reasoning models on this plan: they burn tokens on
-  # chain-of-thought, so min_max_tokens=1024 keeps room for actual answer.
-  - id: zai-glm
-    enabled: true
-    base_url: https://api.z.ai/api/coding/paas/v4
-    api_key_env: ZAI_API_KEY
-    model: glm-4.6
-    is_reasoning: true
-    min_max_tokens: 1024
-    concurrency: 1
-
-  - id: zai-glm5
-    enabled: true
-    base_url: https://api.z.ai/api/coding/paas/v4
-    api_key_env: ZAI_API_KEY
-    model: glm-5
-    is_reasoning: true
-    min_max_tokens: 1024
-    concurrency: 1
-
+  # GLM Coding Plan: reasoning models. min_max_tokens=1024 leaves room
+  # for the answer after chain-of-thought. Kept the best 2 from the eval
+  # (Turbo + 5.1); 4.6 and base 5 dropped after head-to-head.
   - id: zai-glm5.1
     enabled: true
     base_url: https://api.z.ai/api/coding/paas/v4
@@ -120,7 +102,7 @@ models:
     model: glm-5.1
     is_reasoning: true
     min_max_tokens: 1024
-    concurrency: 1
+    concurrency: 3
 
   - id: zai-glm5Turbo
     enabled: true
@@ -129,7 +111,7 @@ models:
     model: GLM-5-Turbo
     is_reasoning: true
     min_max_tokens: 1024
-    concurrency: 1
+    concurrency: 3
 
 
   # /coding/v1 is gated by User-Agent: must look like a known coding agent.
