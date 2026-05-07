@@ -87,12 +87,44 @@ models:
     concurrency: 3
 
   # GLM Coding Plan -> use the coding endpoint, not the general one.
+  # All GLM models are reasoning models on this plan: they burn tokens on
+  # chain-of-thought, so min_max_tokens=1024 keeps room for actual answer.
   - id: zai-glm
     enabled: true
     base_url: https://api.z.ai/api/coding/paas/v4
     api_key_env: ZAI_API_KEY
     model: glm-4.6
+    is_reasoning: true
+    min_max_tokens: 1024
     concurrency: 3
+
+  - id: zai-glm5
+    enabled: true
+    base_url: https://api.z.ai/api/coding/paas/v4
+    api_key_env: ZAI_API_KEY
+    model: glm-5
+    is_reasoning: true
+    min_max_tokens: 1024
+    concurrency: 3
+
+  - id: zai-glm5.1
+    enabled: true
+    base_url: https://api.z.ai/api/coding/paas/v4
+    api_key_env: ZAI_API_KEY
+    model: glm-5.1
+    is_reasoning: true
+    min_max_tokens: 1024
+    concurrency: 3
+
+  - id: zai-glm5Turbo
+    enabled: true
+    base_url: https://api.z.ai/api/coding/paas/v4
+    api_key_env: ZAI_API_KEY
+    model: GLM-5-Turbo
+    is_reasoning: true
+    min_max_tokens: 1024
+    concurrency: 3
+
 
   # /coding/v1 is gated by User-Agent: must look like a known coding agent.
   - id: kimi-k2
@@ -139,12 +171,20 @@ models:
     use_provider_cost: true
     concurrency: 3
 
-  # Ollama Cloud — using OpenAI-compatible /v1 endpoint.
+  # Ollama Cloud — using OpenAI-compatible /v1 endpoint. https://ollama.com/api/tags
   # Available cloud models (suffix -cloud): gpt-oss:20b-cloud, gpt-oss:120b-cloud,
   # qwen3-coder:480b-cloud, deepseek-v3.1:671b-cloud. Verify on docs.ollama.com/cloud.
-  - id: ollama-cloud
+
+  - id: ollama-gpt-oss
     enabled: true
     base_url: https://ollama.com/v1
     api_key_env: OLAMA_API_KEY
-    model: gpt-oss:120b-cloud
+    model: gpt-oss:120b:cloud
+    concurrency: 2
+
+  - id: ollama-deepseek-v4-pro
+    enabled: true
+    base_url: https://ollama.com/v1
+    api_key_env: OLAMA_API_KEY
+    model: deepseek-v4-pro:cloud
     concurrency: 2

@@ -73,9 +73,10 @@ class LLMClient:
         respect_retry_after: bool = True,
     ) -> CallResult:
         api_key = self._api_key()
+        effective_max_tokens = max(max_tokens, self.model.min_max_tokens or 0)
         body: dict[str, Any] = {
             "model": self.model.model,
-            "max_tokens": max_tokens,
+            "max_tokens": effective_max_tokens,
             "temperature": self.model.temperature if temperature is None else temperature,
             "messages": [
                 {"role": "system", "content": system_prompt},

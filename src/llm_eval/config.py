@@ -143,6 +143,9 @@ class ModelConfig(BaseModel):
     concurrency: int | None = None
     temperature: float | None = None
     extra_headers: dict[str, str] = Field(default_factory=dict)
+    # Reasoning models burn tokens on chain-of-thought; per-task max_tokens
+    # can starve them. If set, raise effective max_tokens to at least this.
+    min_max_tokens: int | None = None
 
 
 class RunConfig(BaseModel):
