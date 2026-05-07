@@ -3,10 +3,11 @@ defaults:
   temperature: 0.0
   repeats: 1
 
-# Switched to zai-glm so judge uses a key the user actually has set.
-# Change back to gpt-4-1-mini (or any enabled model) when OPENAI_API_KEY is available.
+# Judge: fast, cheap, reliable JSON output. Changed from zai-glm because
+# reasoning models are slow and burn budget; deepseek-v4-flash-or scored
+# 0.79 with 100% json_ok in early runs.
 judge:
-  model_id: zai-glm
+  model_id: deepseek-v4-flash-or
 
 reporting:
   filter:
