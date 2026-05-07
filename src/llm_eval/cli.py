@@ -5,11 +5,11 @@ from __future__ import annotations
 import asyncio
 import json
 import os
-import shutil
 from datetime import datetime
 from pathlib import Path
 
 import typer
+import yaml
 from pydantic import ValidationError
 from rich.console import Console
 
@@ -121,7 +121,22 @@ def run(
         f"[bold]just run --out {out} --resume[/bold]"
     )
 
-    shutil.copyfile(config, out / "models.yaml")
+    # Snapshot the run config — but only the models actually being run, plus
+    # the judge model if separate. Mirrors what really happened, so a future
+    # `llm-eval report` or `--resume` reads a faithful record.
+    selected_ids = {m.id for m in selected}
+    judge_id = cfg.judge.model_id if cfg.judge else None
+    snapshot_models = list(selected)
+    if judge_id and judge_id not in selected_ids:
+        judge_model = next((m for m in cfg.models if m.id == judge_id), None)
+        if judge_model is not None:
+            snapshot_models.append(judge_model)
+    snapshot = cfg.model_dump(exclude_none=True, by_alias=True)
+    snapshot["models"] = [m.model_dump(exclude_none=True, by_alias=True) for m in snapshot_models]
+    (out / "models.yaml").write_text(
+        yaml.safe_dump(snapshot, sort_keys=False, allow_unicode=True),
+        encoding="utf-8",
+    )
 
     runner_obj = Runner(config=cfg, models=selected, tasks=task_list, out_dir=out, resume=resume)
     asyncio.run(runner_obj.run())
