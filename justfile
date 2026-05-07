@@ -16,8 +16,8 @@ report run_dir:
 validate config="models.yaml" tasks="tasks.jsonl":
     uv run llm-eval validate --config {{config}} --tasks {{tasks}}
 
-ping config="models.yaml" *args="":
-    uv run llm-eval ping --config {{config}} {{args}}
+ping *args="":
+    uv run llm-eval ping --config models.yaml {{args}}
 
 test *args="":
     uv run pytest {{args}}
