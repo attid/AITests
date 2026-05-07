@@ -125,7 +125,19 @@ def run(
 
     runner_obj = Runner(config=cfg, models=selected, tasks=task_list, out_dir=out, resume=resume)
     asyncio.run(runner_obj.run())
-    console.print(f"[green]Done.[/green] Run report with: [bold]llm-eval report {out}[/bold]")
+
+    # Auto-generate the report so the user doesn't have to remember a second step.
+    records = list(ResultStore(out / "results.jsonl").read())
+    if records:
+        write_results_csv(records, out / "results.csv")
+        write_leaderboard_csv(records, out / "leaderboard.csv")
+        write_markdown_report(records, cfg, out / "report.md", run_dir=out)
+        console.print(
+            f"[green]Done.[/green] Report: [bold]{out / 'report.md'}[/bold] "
+            f"(also results.csv, leaderboard.csv)"
+        )
+    else:
+        console.print(f"[yellow]Done but no records to report.[/yellow] {out}")
 
 
 @app.command()
