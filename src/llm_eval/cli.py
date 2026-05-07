@@ -87,7 +87,15 @@ def run(
     skip: str = typer.Option("", "--skip", help="Comma-separated model IDs to exclude"),
 ) -> None:
     """Run all enabled models against tasks; write JSONL stream."""
-    cfg = load_run_config(config)
+    # On --resume, the run dir already has a snapshot of which models were
+    # selected. Use it as source of truth so we don't accidentally start
+    # firing requests at models that weren't part of the original run.
+    snapshot = out / "models.yaml" if out is not None else None
+    if resume and snapshot is not None and snapshot.exists():
+        cfg = load_run_config(snapshot)
+        console.print(f"[dim]Resume: using config snapshot at {snapshot}[/dim]")
+    else:
+        cfg = load_run_config(config)
     task_list = _load_tasks(tasks)
 
     only_ids = [s for s in only.split(",") if s]
