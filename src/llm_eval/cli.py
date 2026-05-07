@@ -116,6 +116,10 @@ def run(
     console.print(f"[cyan]Run dir:[/cyan] {out}")
     console.print(f"[cyan]Models:[/cyan] {', '.join(m.id for m in selected)}")
     console.print(f"[cyan]Tasks:[/cyan] {len(task_list)} x {cfg.defaults.repeats} repeats")
+    console.print(
+        f"[dim]If it hangs, Ctrl+C and resume with:[/dim] "
+        f"[bold]just run --out {out} --resume[/bold]"
+    )
 
     shutil.copyfile(config, out / "models.yaml")
 
